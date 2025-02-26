@@ -1,9 +1,11 @@
 from azure.servicebus import ServiceBusClient, ServiceBusMessage
 from openai import OpenAI
 import json
+import time
+import tiktoken  # Install using `pip install tiktoken`
 
 # Azure Service Bus Configuration
-CONNECTION_STRING = "Endpoint=sb://172.18.32.1;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+CONNECTION_STRING = "Endpoint=sb://192.168.29.174;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
 QUEUE_NAME = "ngi_exp_request_queue"
 NEW_QUEUE_NAME = "ngi_exp_response_queue"
 
@@ -64,15 +66,24 @@ client = OpenAI(
 # Construct prompt with all 5 people's data
 prompt = f"Generate a different joke for each of these 5 people based on their details:\n{json.dumps(merged_data, indent=2)}"
 
-# Send API request (Single request for all 5)
+# Count tokens
+tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")
+num_tokens = len(tokenizer.encode(prompt))
+print(f"🔢 Token Count: {num_tokens}")
+
+# Measure API request execution time
+start_time = time.time()
 completion = client.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[{"role": "user", "content": prompt}]
 )
+end_time = time.time()
+api_execution_time = end_time - start_time
 
 # Extract AI Response
 ai_response = completion.choices[0].message.content
-print("\n🤖 AI Response:\n", ai_response)
+print(f"\n🤖 AI Response:\n{ai_response}")
+print(f"⏱ API Execution Time: {api_execution_time:.2f} seconds")
 
 # Parse the AI response into individual jokes
 jokes = ai_response.strip().split("\n\n")  # Split responses assuming newlines separate them

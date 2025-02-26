@@ -1,8 +1,9 @@
 from azure.servicebus import ServiceBusClient, ServiceBusMessage
 import json
+import time
 
 # Azure Service Bus Connection String (Local Emulator or Cloud)
-CONNECTION_STRING = "Endpoint=sb://192.168.0.6;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+CONNECTION_STRING = "Endpoint=sb://192.168.29.174;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
 QUEUE_NAME = "ngi_exp_request_queue"
 
 # Disable TLS (Workaround for issue in Azure SDK)
@@ -13,72 +14,43 @@ def new_init(self, hostname, **kwargs):
     org_init(self, hostname, **kwargs)
 AMQPClient.__init__ = new_init
 
-# User A's Data Split into Multiple Messages
-user_a_messages = [
-    {
-        "personId": "12345",  # Unique identifier for User A
-        "firstName": "John",
-        "lastName": "Doe",
-        "email": "johndoe@example.com"
-    },  # Message 1 - Basic Details
-    {
-        "personId": "12345",
-        "phone": "+1-555-9876",
-        "address": {
-            "street": "789 Pine Street",
-            "city": "Boston",
-            "state": "MA",
-            "zipCode": "02108"
+# Generate data for 10 users
+users_data = []
+for i in range(1, 11):
+    person_id = str(10000 + i)  # Unique identifier
+    users_data.extend([
+        {  # Message 1 - Basic Details
+            "personId": person_id,
+            "firstName": f"User{i}",
+            "lastName": "Test",
+            "email": f"user{i}@example.com"
+        },
+        {  # Message 2 - Contact Details Update
+            "personId": person_id,
+            "phone": f"+1-555-100{i}",
+            "address": {
+                "street": f"{i} Main Street",
+                "city": "CityX",
+                "state": "StateY",
+                "zipCode": f"1234{i}"
+            }
+        },
+        {  # Message 3 - Employment Details
+            "personId": person_id,
+            "employment": {
+                "company": f"Company{i}",
+                "position": "Developer",
+                "startDate": f"202{i}-01-01"
+            }
+        },
+        {  # Message 4 - Email Update
+            "personId": person_id,
+            "email": f"user{i}@company{i}.com"
         }
-    },  # Message 2 - Contact Details Update
-    {
-        "personId": "12345",
-        "employment": {
-            "company": "TechCorp",
-            "position": "Senior Software Engineer",
-            "startDate": "2023-01-10"
-        }
-    },  # Message 3 - Employment Details
-    {
-        "personId": "12345",
-        "email": "john.doe@techcorp.com"
-    }  # Message 4 - Email Update
-]
+    ])
 
-# User B's Data Split into Multiple Messages
-user_b_messages = [
-    {
-        "personId": "67890",  # Unique identifier for User B
-        "firstName": "Jane",
-        "lastName": "Smith",
-        "email": "janesmith@example.com"
-    },  # Message 1 - Basic Details
-    {
-        "personId": "67890",
-        "phone": "+1-555-1234",
-        "address": {
-            "street": "456 Elm Street",
-            "city": "New York",
-            "state": "NY",
-            "zipCode": "10001"
-        }
-    },  # Message 2 - Contact Details Update
-    {
-        "personId": "67890",
-        "employment": {
-            "company": "DataCorp",
-            "position": "Data Scientist",
-            "startDate": "2022-05-15"
-        }
-    },  # Message 3 - Employment Details
-    {
-        "personId": "67890",
-        "email": "jane.smith@datacorp.com"
-    }  # Message 4 - Email Update
-]
-
-# Combine Messages for Both Users
-all_messages = user_a_messages + user_b_messages
+# Measure start time
+start_time = time.time()
 
 # Create Service Bus Client
 servicebus_client = ServiceBusClient.from_connection_string(CONNECTION_STRING)
@@ -87,10 +59,12 @@ servicebus_client = ServiceBusClient.from_connection_string(CONNECTION_STRING)
 with servicebus_client:
     sender = servicebus_client.get_queue_sender(queue_name=QUEUE_NAME)
     with sender:
-        for msg in all_messages:
-            # Serialize the message to JSON and send it to the queue
+        for msg in users_data:
             servicebus_msg = ServiceBusMessage(json.dumps(msg))
             sender.send_messages(servicebus_msg)
             print(f"Sent message: {msg}")
 
-print("All messages for User A and User B sent successfully!")
+# Measure end time and calculate execution time
+end_time = time.time()
+execution_time = end_time - start_time
+print(f"All messages for 10 users sent successfully! Execution Time: {execution_time:.2f} seconds")
