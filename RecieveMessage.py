@@ -1,99 +1,109 @@
-from azure.servicebus import ServiceBusClient, ServiceBusMessage
-from openai import OpenAI
+import aiohttp
+import asyncio
 import json
 import time
-import tiktoken  # Install using `pip install tiktoken`
+import tiktoken
+from azure.servicebus import ServiceBusMessage
+from azure.servicebus.aio import ServiceBusClient
 
 # Azure Service Bus Configuration
-CONNECTION_STRING = "Endpoint=sb://192.168.29.174;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+CONNECTION_STRING = "Endpoint=sb://192.168.0.3;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
 QUEUE_NAME = "ngi_exp_request_queue"
 NEW_QUEUE_NAME = "ngi_exp_response_queue"
-
-# Disable TLS (Workaround for issue in Azure SDK)
-from azure.servicebus._pyamqp import AMQPClient
-org_init = AMQPClient.__init__
-def new_init(self, hostname, **kwargs):
-    kwargs["use_tls"] = False  # Disable TLS
-    org_init(self, hostname, **kwargs)
-AMQPClient.__init__ = new_init
-
-# Initialize Service Bus Client
-servicebus_client = ServiceBusClient.from_connection_string(CONNECTION_STRING)
 
 # Dictionary to store data of 5 people
 merged_data = {}
 
-# Receive Messages & Merge Data for 5 Different personId's
-with servicebus_client:
-    receiver = servicebus_client.get_queue_receiver(queue_name=QUEUE_NAME, max_wait_time=5)
+from azure.servicebus._pyamqp import AMQPClient
+org_init = AMQPClient.__init__
+def new_init(self, hostname, **kwargs):
+    kwargs["use_tls"] = False
+    org_init(self, hostname, **kwargs)
+AMQPClient.__init__ = new_init
 
-    with receiver:
-        for message in receiver.receive_messages(max_message_count=20):  # Fetch messages
-            msg_body = json.loads(str(message))
-            person_id = msg_body.get("personId")
+# ✅ Async function to receive messages
+async def receive_messages():
+    async with ServiceBusClient.from_connection_string(CONNECTION_STRING) as servicebus_client:
+        async with servicebus_client.get_queue_receiver(queue_name=QUEUE_NAME, max_wait_time=5) as receiver:
+            messages = await receiver.receive_messages(max_message_count=20)
+            
+            for message in messages:
+                msg_body = json.loads(str(message))
+                person_id = msg_body.get("personId")
 
-            if not person_id:
-                print("⚠️ Message without personId, skipping.")
-                continue
+                if not person_id:
+                    print("⚠️ Message without personId, skipping.")
+                    await receiver.complete_message(message)
+                    continue
 
-            # Initialize dictionary for each personId
-            if person_id not in merged_data:
-                merged_data[person_id] = {}  # Store each person's data as a dictionary
+                if person_id not in merged_data:
+                    merged_data[person_id] = {}
+                
+                for key, value in msg_body.items():
+                    if key != "personId":
+                        merged_data[person_id][key] = value
 
-            # Merge data
-            for key, value in msg_body.items():
-                if key != "personId":  # Avoid duplicating personId
-                    merged_data[person_id][key] = value
+                print(f"📩 Received message for {person_id}: {msg_body}")
+                await receiver.complete_message(message)
 
-            print(f"📩 Received message for {person_id}: {msg_body}")
-            receiver.complete_message(message)  # Mark message as processed
+                # Stop after collecting data for 5 people
+                if len(merged_data) == 5:
+                    print("✅ Collected data for 5 different people, stopping processing.")
+                    break
 
-            # Stop after collecting data of 5 people
-            if len(merged_data) == 5:
-                print("✅ Collected data for 5 different people, stopping processing.")
-                break
+# ✅ Async function to make API calls using aiohttp
+async def fetch_openai_response(session, prompt):
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer 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",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": [{"role": "user", "content": prompt}]
+    }
+    async with session.post(url, headers=headers, json=data) as response:
+        result = await response.json()
+        return result["choices"][0]["message"]["content"]
 
-# Print the final merged data
-print("\n🔹 Merged Data:")
-print(json.dumps(merged_data, indent=4))
+# ✅ Function to create prompts
+def create_prompt():
+    return f"Generate a different joke for each of these 5 people based on their details:\n{json.dumps(merged_data, indent=2)}"
 
-# Initialize OpenAI Client
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="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"  # Replace with your actual key
-)
+# ✅ Async function to call OpenAI API concurrently
+async def get_ai_responses():
+    prompt = create_prompt()
+    tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    num_tokens = len(tokenizer.encode(prompt))
+    print(f"🔢 Token Count: {num_tokens}")
 
-# Construct prompt with all 5 people's data
-prompt = f"Generate a different joke for each of these 5 people based on their details:\n{json.dumps(merged_data, indent=2)}"
+    async with aiohttp.ClientSession() as session:
+        start_time = time.time()
+        tasks = [fetch_openai_response(session, prompt) for _ in merged_data]
+        responses = await asyncio.gather(*tasks)
+        end_time = time.time()
 
-# Count tokens
-tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")
-num_tokens = len(tokenizer.encode(prompt))
-print(f"🔢 Token Count: {num_tokens}")
+        print(f"⏱ API Execution Time: {end_time - start_time:.2f} seconds")
+        return responses
 
-# Measure API request execution time
-start_time = time.time()
-completion = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[{"role": "user", "content": prompt}]
-)
-end_time = time.time()
-api_execution_time = end_time - start_time
+# ✅ Async function to send responses to Azure Service Bus
+async def send_responses(responses):
+    async with ServiceBusClient.from_connection_string(CONNECTION_STRING) as servicebus_client:
+        async with servicebus_client.get_queue_sender(NEW_QUEUE_NAME) as response_sender:
+            for i, (person_id, response) in enumerate(zip(merged_data.keys(), responses)):
+                ai_response_message = ServiceBusMessage(json.dumps({"personId": person_id, "response": response}))
+                await response_sender.send_messages(ai_response_message)
+                print(f"✅ AI Response for {person_id} sent to the queue '{NEW_QUEUE_NAME}'!")
 
-# Extract AI Response
-ai_response = completion.choices[0].message.content
-print(f"\n🤖 AI Response:\n{ai_response}")
-print(f"⏱ API Execution Time: {api_execution_time:.2f} seconds")
+# ✅ Main function to orchestrate the flow
+async def main():
+    await receive_messages()
+    if len(merged_data) == 0:
+        print("❗ No messages received.")
+        return
+    
+    responses = await get_ai_responses()
+    await send_responses(responses)
 
-# Parse the AI response into individual jokes
-jokes = ai_response.strip().split("\n\n")  # Split responses assuming newlines separate them
-
-# Send AI Response to the new queue (split for each person)
-with servicebus_client:
-    response_sender = servicebus_client.get_queue_sender(NEW_QUEUE_NAME)
-    with response_sender:
-        for i, person_id in enumerate(merged_data.keys()):
-            joke_text = jokes[i] if i < len(jokes) else "No joke available"
-            ai_response_message = ServiceBusMessage(json.dumps({"personId": person_id, "response": joke_text}))
-            response_sender.send_messages(ai_response_message)
-            print(f"✅ AI Response for {person_id} sent to the queue '{NEW_QUEUE_NAME}'!")
+# Run the async event loop
+asyncio.run(main())
