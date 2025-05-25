@@ -20,8 +20,3 @@
 # # Run it
 # response = cot(question="Why do leaves change color in the fall?")
 # print("Answer:", response.answer)
-from dspy.clients.openai import openai
-
-# Example usage:
-configure(lm=OpenAI(model="gpt-3.5-turbo"))
-print(lm)
