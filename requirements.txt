@@ -1,0 +1,5 @@
+dspy
+dspy-ai
+openai
+dotenv
+google-generative-ai
