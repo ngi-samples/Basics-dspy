@@ -1,0 +1,212 @@
+[
+  {
+    "title": "Google Pixel 6",
+    "description": "128GB, Android 12, 5G capable",
+    "category": "Mobile Phones",
+    "price": 315.11,
+    "rating": 4.4
+  },
+  {
+    "title": "MacBook Air M2",
+    "description": "13-inch, 8GB RAM, 256GB SSD",
+    "category": "Laptops",
+    "price": 706.32,
+    "rating": 4.6
+  },
+  {
+    "title": "Anker PowerCore 10000",
+    "description": "Portable Charger, High-Speed Charging",
+    "category": "Electronics",
+    "price": 1138.76,
+    "rating": 3.5
+  },
+  {
+    "title": "Apple iPhone 13",
+    "description": "128GB, Midnight, A15 Bionic chip",
+    "category": "Mobile Phones",
+    "price": 133.22,
+    "rating": 4.7
+  },
+  {
+    "title": "MacBook Air M2",
+    "description": "13-inch, 8GB RAM, 256GB SSD",
+    "category": "Laptops",
+    "price": 372.22,
+    "rating": 3.8
+  },
+  {
+    "title": "Sony WH-1000XM4",
+    "description": "Wireless Noise Canceling Headphones",
+    "category": "Electronics",
+    "price": 634.17,
+    "rating": 4.7
+  },
+  {
+    "title": "Dell XPS 13",
+    "description": "Intel i7, 16GB RAM, 512GB SSD",
+    "category": "Laptops",
+    "price": 1321.7,
+    "rating": 3.7
+  },
+  {
+    "title": "OnePlus 9",
+    "description": "5G, 128GB, Hasselblad Camera",
+    "category": "Mobile Phones",
+    "price": 1173.48,
+    "rating": 4.9
+  },
+  {
+    "title": "Atomic Habits",
+    "description": "James Clear - An Easy & Proven Way to Build Good Habits",
+    "category": "Books",
+    "price": 1188.34,
+    "rating": 4.4
+  },
+  {
+    "title": "Philips Hue Bulb",
+    "description": "Smart Bulb with Bluetooth and Zigbee",
+    "category": "Home Appliances",
+    "price": 1400.62,
+    "rating": 3.6
+  },
+  {
+    "title": "Samsung 980 PRO",
+    "description": "1TB PCIe Gen4 NVMe Internal Gaming SSD",
+    "category": "Electronics",
+    "price": 176.63,
+    "rating": 4.8
+  },
+  {
+    "title": "Apple iPhone 13",
+    "description": "128GB, Midnight, A15 Bionic chip",
+    "category": "Mobile Phones",
+    "price": 1225.41,
+    "rating": 4.6
+  },
+  {
+    "title": "Philips Hue Bulb",
+    "description": "Smart Bulb with Bluetooth and Zigbee",
+    "category": "Home Appliances",
+    "price": 1249.06,
+    "rating": 3.9
+  },
+  {
+    "title": "MacBook Air M2",
+    "description": "13-inch, 8GB RAM, 256GB SSD",
+    "category": "Laptops",
+    "price": 658.85,
+    "rating": 4.2
+  },
+  {
+    "title": "Clean Code",
+    "description": "Robert C. Martin - A Handbook of Agile Software Craftsmanship",
+    "category": "Books",
+    "price": 164.43,
+    "rating": 4.9
+  },
+  {
+    "title": "Deep Work",
+    "description": "Cal Newport - Rules for Focused Success in a Distracted World",
+    "category": "Books",
+    "price": 856.09,
+    "rating": 4.8
+  },
+  {
+    "title": "HP Spectre x360",
+    "description": "2-in-1 Touchscreen, 16GB RAM, 1TB SSD",
+    "category": "Laptops",
+    "price": 805.38,
+    "rating": 4.0
+  },
+  {
+    "title": "Atomic Habits",
+    "description": "James Clear - An Easy & Proven Way to Build Good Habits",
+    "category": "Books",
+    "price": 671.02,
+    "rating": 3.8
+  },
+  {
+    "title": "iRobot Roomba 692",
+    "description": "Robot Vacuum with Wi-Fi Connectivity",
+    "category": "Home Appliances",
+    "price": 1331.21,
+    "rating": 4.3
+  },
+  {
+    "title": "Echo Dot (4th Gen)",
+    "description": "Smart speaker with Alexa",
+    "category": "Electronics",
+    "price": 1001.61,
+    "rating": 5.0
+  },
+  {
+    "title": "Dell XPS 13",
+    "description": "Intel i7, 16GB RAM, 512GB SSD",
+    "category": "Laptops",
+    "price": 145.25,
+    "rating": 3.6
+  },
+  {
+    "title": "Dell XPS 13",
+    "description": "Intel i7, 16GB RAM, 512GB SSD",
+    "category": "Laptops",
+    "price": 141.1,
+    "rating": 4.6
+  },
+  {
+    "title": "Samsung Galaxy S21",
+    "description": "128GB, Phantom Gray, Android flagship",
+    "category": "Mobile Phones",
+    "price": 420.65,
+    "rating": 4.6
+  },
+  {
+    "title": "Dell XPS 13",
+    "description": "Intel i7, 16GB RAM, 512GB SSD",
+    "category": "Laptops",
+    "price": 339.42,
+    "rating": 4.0
+  },
+  {
+    "title": "Clean Code",
+    "description": "Robert C. Martin - A Handbook of Agile Software Craftsmanship",
+    "category": "Books",
+    "price": 108.02,
+    "rating": 4.7
+  },
+  {
+    "title": "Google Pixel 6",
+    "description": "128GB, Android 12, 5G capable",
+    "category": "Mobile Phones",
+    "price": 378.45,
+    "rating": 4.3
+  },
+  {
+    "title": "Google Pixel 6",
+    "description": "128GB, Android 12, 5G capable",
+    "category": "Mobile Phones",
+    "price": 269.3,
+    "rating": 4.6
+  },
+  {
+    "title": "Dyson V11",
+    "description": "Cordless Vacuum Cleaner",
+    "category": "Home Appliances",
+    "price": 102.1,
+    "rating": 4.8
+  },
+  {
+    "title": "MacBook Air M2",
+    "description": "13-inch, 8GB RAM, 256GB SSD",
+    "category": "Laptops",
+    "price": 946.52,
+    "rating": 4.8
+  },
+  {
+    "title": "HP Spectre x360",
+    "description": "2-in-1 Touchscreen, 16GB RAM, 1TB SSD",
+    "category": "Laptops",
+    "price": 1135.97,
+    "rating": 3.7
+  }
+]
